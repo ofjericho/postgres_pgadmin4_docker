@@ -1,0 +1,36 @@
+
+Criação do BD Postgres + pgAdmin4 via Docker Hub
+
+- Baixando via Docker Hub
+	- docker pull postgres
+	- docker pull dpage/pgadmin4
+- Criando uma network para execução dos containers
+	- Networks (redes) englobando containers que possuam alguma relação entre si constituem mais uma das estruturas disponibilizadas pela Docker. A fim de tornar possível o uso integrado de uma instância do PostgreSQL com o pgAdmin 4 será criada uma rede chamada postgres-network, com isto acontecendo através da seguinte instrução:
+	- docker network create --driver bridge postgres-network
+- Criando container Postgres
+	- docker run --name teste-postgres --network=postgres-network -e "POSTGRES_PASSWORD=Post2020!" -p 5432:5432 -v /home/estudos/pg:/var/lib/postgresql/data -d postgres
+		- O atributo name especifica o nome do container a ser gerado (postgres);
+		- Para o atributo network foi definido o valor da rede criada na seção anterior (postgres-network);
+		- No atributo POSTGRES_PASSWORD foi indicada a senha do administrador (para o usuário default postgres);
+		- O atributo -p indica a porta (5432) em que se dará a comunicação com o PostgreSQL, a qual será mapeada para a porta default (5432) deste SGBD dentro do container;
+		- Através do atributo -v foi criado um volume, especificando assim o diretório no Ubuntu Desktop em que serão gravados os arquivos de dados (/home/estudos/pg);
+		- Quanto ao atributo -d, este parâmetro determina que o container em questão será executado como um serviço em background;
+		- Temos indicada ainda a imagem utilizada como base para a geração do container (postgres).
+- Criando container pgAdmin4
+	- docker run --name teste-pgadmin --network=postgres-network -p 15432:80 -e "PGADMIN_DEFAULT_EMAIL=maia73@gmail.com" -e "PGADMIN_DEFAULT_PASSWORD=Post2020!" -d dpage/pgadmin4
+		- O atributo name indica o nome do container a ser criado (teste-pgadmin);
+		- No atributo network foi atribuído o nome da rede utilizada na comunicação entre a instância do PostgreSQL e o pgAdmin (postgres-network);
+		- O atributo -p especifica a porta (15432) em que acontecerá a comunicação com o pgAdmin 4, a qual será mapeada para a porta default (80) desta aplicação Web;
+		- No atributo PGADMIN_DEFAULT_EMAIL foi informado o e-mail de acesso ao pgAdmin;
+		- No atributo PGADMIN_DEFAULT_PASSWORD foi indicada ainda a senha de acesso ao pgAdmin 4;
+		- Temos especificada também a imagem empregada na geração do container (dpage/pgadmin4).
+-  Acesso Postgres via pgAdmin4
+	-  http://localhost:15432 
+- Criação do Server 
+	- aba General
+		- Name = Identificação da conexão
+		- Comments = Identificação da conexão
+	- aba Connection
+		- Em Host name/address informar o nome do container que corresponde à instância do PostgreSQL (postgres);
+		- Em Port definir o valor 5432 (porta indicada para acesso ao container quando da sua criação);
+		- No atributo Username será informado o usuário default do PostgreSQL (postgres), bem como a senha correspondente em Password (Post2020!).
